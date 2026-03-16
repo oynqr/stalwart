@@ -6,7 +6,7 @@
 
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 
-use rustls::{SupportedCipherSuite, crypto::ring::cipher_suite::*};
+use rustls::{SupportedCipherSuite, crypto::aws_lc_rs::cipher_suite::*};
 
 use super::utils::ParseValue;
 

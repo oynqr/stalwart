@@ -20,7 +20,7 @@ use dns_update::{DnsUpdater, TsigAlgorithm, providers::rfc2136::DnsAddress};
 use rcgen::generate_simple_self_signed;
 use rustls::{
     SupportedProtocolVersion,
-    crypto::ring::sign::any_supported_type,
+    crypto::aws_lc_rs::sign::any_supported_type,
     sign::CertifiedKey,
     version::{TLS12, TLS13},
 };

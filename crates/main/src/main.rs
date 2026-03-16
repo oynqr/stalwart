@@ -29,6 +29,10 @@ static GLOBAL: Jemalloc = Jemalloc;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .expect("Could not set aws_lc_rs as default provider");
+
     // Load config and apply macros
     let mut init = Box::pin(BootManager::init()).await;
 

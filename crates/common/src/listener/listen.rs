@@ -11,7 +11,7 @@ use std::{
 };
 
 use proxy_header::io::ProxiedStream;
-use rustls::crypto::ring::cipher_suite::TLS13_AES_128_GCM_SHA256;
+use rustls::crypto::aws_lc_rs::cipher_suite::TLS13_AES_128_GCM_SHA256;
 use tokio::{net::TcpStream, sync::watch};
 use tokio_rustls::server::TlsStream;
 use trc::{EventType, HttpEvent, ImapEvent, ManageSieveEvent, Pop3Event, SmtpEvent};

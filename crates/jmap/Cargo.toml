@@ -22,7 +22,7 @@ calcard = { version = "0.3" }
 smtp-proto = { version = "0.2" }
 mail-parser = { version = "0.11", features = ["full_encoding", "rkyv"] } 
 mail-builder = { version = "0.4" }
-mail-send = { version = "0.5", default-features = false, features = ["cram-md5", "ring", "tls12"] }
+mail-send = { version = "0.5", default-features = false, features = ["cram-md5", "aws-lc-rs", "tls12"] }
 mail-auth = { version = "0.7.1", features = ["generate"] }
 sieve-rs = { version = "0.7", features = ["rkyv"] } 
 jmap-tools = { version = "0.1", features = ["rkyv"] }

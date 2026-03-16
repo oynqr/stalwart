@@ -12,11 +12,10 @@ use crate::{
     jmap::{JMAPTest, ManagementApi, mail::delivery::SmtpConnection},
 };
 use base64::{Engine, engine::general_purpose};
-use biscuit::{JWT, SingleOrMultiple, jwk::JWKSet};
 use bytes::Bytes;
 use common::auth::oauth::{
     introspect::OAuthIntrospect,
-    oidc::StandardClaims,
+    oidc::IdTokenClaims,
     registration::{ClientRegistrationRequest, ClientRegistrationResponse},
 };
 use http::auth::oauth::{
@@ -28,6 +27,7 @@ use jmap_client::{
     client::{Client, Credentials},
     mailbox::query::Filter,
 };
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, jwk::JwkSet};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::{Duration, Instant};
 use store::ahash::AHashMap;
@@ -55,7 +55,7 @@ pub async fn test(params: &mut JMAPTest) {
         get("https://127.0.0.1:8899/.well-known/oauth-authorization-server").await;
     let oidc_metadata: OpenIdMetadata =
         get("https://127.0.0.1:8899/.well-known/openid-configuration").await;
-    let jwk_set: JWKSet<()> = get(&oidc_metadata.jwks_uri).await;
+    let jwk_set: JwkSet = get(&oidc_metadata.jwks_uri).await;
 
     // Register client
     let registration: ClientRegistrationResponse = post_json(
@@ -140,27 +140,21 @@ pub async fn test(params: &mut JMAPTest) {
     );
 
     // Verify ID token using the JWK set
-    let id_token = JWT::<StandardClaims, biscuit::Empty>::new_encoded(&id_token)
-        .decode_with_jwks(&jwk_set, None)
-        .unwrap();
-    let claims = id_token.payload().unwrap();
-    let registered_claims = &claims.registered;
-    let private_claims = &claims.private;
-    assert_eq!(registered_claims.issuer, Some(oidc_metadata.issuer));
+    let jwk = jwk_set.keys.first().unwrap();
+    let decoding_key = DecodingKey::from_jwk(jwk).unwrap();
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.set_audience(&[client_id.to_string()]);
+    let id_token = decode::<IdTokenClaims>(&id_token, &decoding_key, &validation).unwrap();
+    let claims = &id_token.claims;
+    assert_eq!(claims.iss, oidc_metadata.issuer);
+    assert_eq!(claims.sub, account.id().document_id().to_string());
+    assert_eq!(claims.aud, client_id.to_string());
+    assert_eq!(claims.private.nonce, Some("abc1234".into()));
     assert_eq!(
-        registered_claims.subject,
-        Some(account.id().document_id().to_string())
-    );
-    assert_eq!(
-        registered_claims.audience,
-        Some(SingleOrMultiple::Single(client_id.to_string()))
-    );
-    assert_eq!(private_claims.nonce, Some("abc1234".into()));
-    assert_eq!(
-        private_claims.preferred_username,
+        claims.private.preferred_username,
         Some("jdoe@example.com".into())
     );
-    assert_eq!(private_claims.email, Some("jdoe@example.com".into()));
+    assert_eq!(claims.private.email, Some("jdoe@example.com".into()));
 
     // Introspect token
     let access_introspect: OAuthIntrospect = post_with_auth::<OAuthIntrospect>(

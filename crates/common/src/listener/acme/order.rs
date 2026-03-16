@@ -6,7 +6,7 @@ use compact_str::CompactString;
 use dns_update::{DnsRecord, DnsRecordType};
 use futures::future::try_join_all;
 use rcgen::{CertificateParams, DistinguishedName, PKCS_ECDSA_P256_SHA256};
-use rustls::crypto::ring::sign::any_ecdsa_type;
+use rustls::crypto::aws_lc_rs::sign::any_ecdsa_type;
 use rustls::sign::CertifiedKey;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 use std::sync::Arc;

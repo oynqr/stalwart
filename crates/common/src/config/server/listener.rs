@@ -8,7 +8,7 @@ use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use rustls::{
     ALL_VERSIONS, ServerConfig, SupportedCipherSuite,
-    crypto::ring::{ALL_CIPHER_SUITES, default_provider},
+    crypto::aws_lc_rs::{ALL_CIPHER_SUITES, default_provider},
 };
 
 use tokio::net::TcpSocket;

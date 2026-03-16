@@ -11,8 +11,8 @@ use hyper::header::USER_AGENT;
 use rcgen::{Certificate, CustomExtension, PKCS_ECDSA_P256_SHA256};
 use reqwest::header::CONTENT_TYPE;
 use reqwest::{Method, Response};
-use ring::rand::SystemRandom;
-use ring::signature::{ECDSA_P256_SHA256_FIXED_SIGNING, EcdsaKeyPair, EcdsaSigningAlgorithm};
+use aws_lc_rs::rand::SystemRandom;
+use aws_lc_rs::signature::{ECDSA_P256_SHA256_FIXED_SIGNING, EcdsaKeyPair, EcdsaSigningAlgorithm};
 use serde::Deserialize;
 use std::time::Duration;
 use store::Serialize;
@@ -64,7 +64,6 @@ impl Account {
         let key_pair = EcdsaKeyPair::from_pkcs8(
             ALG,
             provider.account_key.load().as_slice(),
-            &SystemRandom::new(),
         )
         .map_err(|err| {
             trc::EventType::Acme(trc::AcmeEvent::Error)

@@ -20,7 +20,7 @@ use hyper::{body, server::conn::http1, service::service_fn};
 use hyper_util::rt::TokioIo;
 use jmap::api::ToJmapHttpResponse;
 use jmap_proto::error::request::RequestError;
-use ring::hmac;
+use aws_lc_rs::hmac;
 use store::parking_lot::Mutex;
 use tokio::{net::TcpListener, sync::watch};
 

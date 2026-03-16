@@ -28,6 +28,10 @@ pub mod modules;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .expect("Could not set aws_lc_rs as default provider");
+
     let args = Cli::parse();
     let url = args
         .url

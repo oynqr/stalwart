@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-SEL
  */
 
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::LazyLock};
 
 #[cfg(not(target_env = "msvc"))]
 use jemallocator::Jemalloc;
@@ -14,6 +14,10 @@ use trc::Collector;
 #[cfg(not(target_env = "msvc"))]
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
+
+static CRYPTO_PROVIDER: LazyLock<()> = std::sync::LazyLock::new(|| rustls::crypto::aws_lc_rs::default_provider()
+    .install_default()
+    .expect("Could not set aws_lc_rs as default provider"));
 
 #[cfg(test)]
 pub mod cluster;
@@ -33,6 +37,7 @@ pub mod store;
 pub mod webdav;
 
 pub fn add_test_certs(config: &str) -> String {
+    *CRYPTO_PROVIDER;
     let mut cert_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     cert_path.push("resources");
     let mut cert = cert_path.clone();
@@ -70,6 +75,7 @@ impl AssertConfig for utils::config::Config {
 
 #[cfg(test)]
 pub fn enable_logging() {
+    *CRYPTO_PROVIDER;
     use common::config::telemetry::Telemetry;
 
     if let Ok(level) = std::env::var("LOG")

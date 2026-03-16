@@ -16,7 +16,7 @@ use arc_swap::ArcSwap;
 use directory::{Directories, Directory};
 use groupware::GroupwareConfig;
 use hyper::HeaderMap;
-use ring::signature::{EcdsaKeyPair, RsaKeyPair};
+use aws_lc_rs::signature::{EcdsaKeyPair, RsaKeyPair};
 use spamfilter::SpamFilterConfig;
 use std::sync::Arc;
 use store::{BlobBackend, BlobStore, InMemoryStore, SearchStore, Store, Stores};
@@ -242,14 +242,13 @@ pub fn build_rsa_keypair(pem: &str) -> Result<RsaKeyPair, String> {
 }
 
 pub fn build_ecdsa_pem(
-    alg: &'static ring::signature::EcdsaSigningAlgorithm,
+    alg: &'static aws_lc_rs::signature::EcdsaSigningAlgorithm,
     pem: &str,
 ) -> Result<EcdsaKeyPair, String> {
     match rustls_pemfile::read_one(&mut pem.as_bytes()) {
         Ok(Some(rustls_pemfile::Item::Pkcs8Key(key))) => EcdsaKeyPair::from_pkcs8(
             alg,
             key.secret_pkcs8_der(),
-            &ring::rand::SystemRandom::new(),
         )
         .map_err(|err| format!("Failed to parse PKCS8 ECDSA key: {err}")),
         Err(err) => Err(format!("Failed to read PEM: {err}")),
